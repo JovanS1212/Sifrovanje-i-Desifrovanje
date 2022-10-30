@@ -13,49 +13,57 @@ class Program
         public string kljuc;
     }
     static bool sifra1(Operacija operacija)
-    {
-        StreamWriter sw;
-        for (int i = 0; i < operacija.kljuc.Length; i++)
         {
-            if (!char.IsLetterOrDigit(operacija.kljuc[i]))
+            StreamWriter sw;
+            StreamReader sr;
+            if (File.Exists(operacija.datoteka))
+            {
+                sr = new StreamReader(operacija.datoteka);
+            }
+            else
             {
                 return false;
             }
-        }
-        StreamReader sb = new StreamReader(operacija.datoteka);
-        if (operacija.sifrovanje)
-        {
-            sw = new StreamWriter("sifrovana_" + operacija.datoteka);
-            while (sb.EndOfStream)
+            for (int i = 0; i < operacija.kljuc.Length; i++)
             {
-                char[] temp = sb.ReadLine().ToCharArray();
+                if (!char.IsLetterOrDigit(operacija.kljuc[i]))
+                {
+                    return false;//da li da promenim tako da za lupam slovo a promeni za jedan karakter ili da ostavim da menja sa ascii kodovima
+                }
+            }
+            if (operacija.sifrovanje)
+            {
+                sw = new StreamWriter("sifrovana_" + operacija.datoteka);
+                while (!sr.EndOfStream)
+                {
+                    char[] temp = sr.ReadLine().ToCharArray();
 
-                for (int i = 0; i < temp.Length; i++)
-                {
-                    temp[i] += operacija.kljuc[i % operacija.kljuc.Length];
+                    for (int i = 0; i < temp.Length; i++)
+                    {
+                        temp[i] += operacija.kljuc[i % operacija.kljuc.Length];
+                    }
+                    sw.WriteLine(temp);
                 }
-                sw.WriteLine(temp);
+                sw.Close();
+                sr.Close();
             }
-            sw.Close();
-            sb.Close();
-        }
-        else
-        {
-            sw = new StreamWriter("desifrovana_" + operacija.datoteka);
-            while (sb.EndOfStream)
+            else
             {
-                char[] temp = sb.ReadLine().ToCharArray();
-                for (int i = 0; i < temp.Length; i++)
+                sw = new StreamWriter("desifrovana_" + operacija.datoteka);
+                while (!sr.EndOfStream)
                 {
-                    temp[i] -= operacija.kljuc[i % operacija.kljuc.Length];
+                    char[] temp = sr.ReadLine().ToCharArray();
+                    for (int i = 0; i < temp.Length; i++)
+                    {
+                        temp[i] -= operacija.kljuc[i % operacija.kljuc.Length];
+                    }
+                    sw.WriteLine(temp);
                 }
-                sw.WriteLine(temp);
+                sw.Close();
+                sr.Close();
             }
-            sw.Close();
-            sb.Close();
+            return true;//ako sve prodje vraca tacno
         }
-        return true;//ako sve prodje vraca tacno
-    }
     static void IspisRadaPrograma(string greska)
     {
         Console.WriteLine("program radi tako sto:");
