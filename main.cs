@@ -16,6 +16,7 @@ class Program
         {
             StreamWriter sw;
             StreamReader sr;
+            int[] kljuc = new int[operacija.kljuc.Length];
             if (File.Exists(operacija.datoteka))
             {
                 sr = new StreamReader(operacija.datoteka);
@@ -26,11 +27,22 @@ class Program
             }
             for (int i = 0; i < operacija.kljuc.Length; i++)
             {
-                if (!char.IsLetterOrDigit(operacija.kljuc[i]))
+                //kljuc moze da bude samo slovo ili broj za ovo sifrovanje
+                //u kodu ispod: ascii kod od slova pretvaram u broj njihovog mesta u alfabetu, a stavljam da cifre pomere za jacinu cifre a ne njihov ascii kod
+                if (char.IsLetter(operacija.kljuc[i]))
                 {
-                    return false;//da li da promenim tako da za lupam slovo a promeni za jedan karakter ili da ostavim da menja sa ascii kodovima
+                    kljuc[i] = char.ToUpper(operacija.kljuc[i])-64;//A ima ascii kod od 65
+                }
+                else if (char.IsDigit(operacija.kljuc[i]))
+                {
+                    kljuc[i] = operacija.kljuc[i]-48;//0 ima ascii kod od 48
+                }
+                else
+                {
+                    return false;
                 }
             }
+            //Sifrovanje
             if (operacija.sifrovanje)
             {
                 sw = new StreamWriter("sifrovana_" + operacija.datoteka);
@@ -40,13 +52,15 @@ class Program
 
                     for (int i = 0; i < temp.Length; i++)
                     {
-                        temp[i] += operacija.kljuc[i % operacija.kljuc.Length];
+                        temp[i] += Convert.ToChar(kljuc[i % kljuc.Length]);//za sifrovanje povecam ascii kod svakog karaktera za njegovo odgovarajuce mesto u kljucu
                     }
                     sw.WriteLine(temp);
                 }
                 sw.Close();
                 sr.Close();
+                Console.WriteLine("Uspesno sifrovano.");
             }
+            //Desifrovanje
             else
             {
                 sw = new StreamWriter("desifrovana_" + operacija.datoteka);
@@ -55,12 +69,13 @@ class Program
                     char[] temp = sr.ReadLine().ToCharArray();
                     for (int i = 0; i < temp.Length; i++)
                     {
-                        temp[i] -= operacija.kljuc[i % operacija.kljuc.Length];
+                        temp[i] -= Convert.ToChar(kljuc[i % kljuc.Length]);//za sifrovanje smanjim ascii kod svakog karaktera za njegovo odgovarajuce mesto u kljucu
                     }
                     sw.WriteLine(temp);
                 }
                 sw.Close();
                 sr.Close();
+                Console.WriteLine("Uspesno desifrovano.");
             }
             return true;//ako sve prodje vraca tacno
         }
@@ -70,41 +85,9 @@ class Program
         Console.WriteLine("bla bla bla");
         Console.WriteLine(greska);
     }
-    static void Loading(string operacija, int brzina)
-    {
-        Console.Write("{0}...", operacija);
-        StringBuilder sb = new StringBuilder("..", 3);
-        Console.SetCursorPosition(0, Console.CursorTop + 1);
-        for (int i = 0; i < 2; i++)
-        {
-            Thread.Sleep(brzina);
-            Console.SetCursorPosition(operacija.Length, Console.CursorTop - 1);
-            Console.Write("{0,-3}", sb);
-            Console.SetCursorPosition(0, Console.CursorTop + 1);
-            if (sb.ToString() != ".") sb = sb.Remove(sb.Length - 1, sb.Length - 1);
-            else sb = new StringBuilder("", 3);
-        }
-        for (int i = 0; i < 4; i++)
-        {
-            Thread.Sleep(brzina);
-            Console.SetCursorPosition(operacija.Length, Console.CursorTop - 1);
-            Console.Write("{0,-3}", sb);
-            Console.SetCursorPosition(0, Console.CursorTop + 1);
-            sb.Append('.');
-        }
-        Console.WriteLine("uspesno izvrseno {0} ", operacija);
-    }
+    
     static void Main(string[] args)
     {
         Operacija[] operacije = new Operacija[2];//umesto 2 treba da stoji args.Length/4 ali jos nemam argumente, i ovo treba tek kasnije da se radi kada se argumenti provere
-
-        //pre ovoga treba da se urade sve operacije nad fajlovima i provere
-
-        for (int i = 0; i < operacije.Length; i++)
-        {
-            if (operacije[i].sifrovanje) Loading("Sifrovanje datoteke " + operacije[i].datoteka, 250);
-            else Loading("Desifrovanje datoteke " + operacije[i].datoteka, 250);
-        }
-
     }
 }
