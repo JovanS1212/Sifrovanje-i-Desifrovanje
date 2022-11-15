@@ -1,7 +1,4 @@
-//kljuc bude mesto u broju pi
-//prvo slovo a -> d ako je ta cifra 3
-//Math.Pi
-//76 -> 86 + duzina kljuca 96 ->106 + duzina kljuca
+
 
 using System;
 using System.Text;
@@ -72,7 +69,7 @@ class Program
             sw = new StreamWriter("desifrovana_" + operacija.datoteka);
             while (!sr.EndOfStream)
             {
-                char[] temp = sr.ReadLine().ToCharArray(); 
+                char[] temp = sr.ReadLine().ToCharArray();
                 for (int i = 0; i < temp.Length; i++)
                 {
                     temp[i] -= Convert.ToChar(kljuc[i % kljuc.Length]);//za sifrovanje smanjim ascii kod svakog karaktera za njegovo odgovarajuce mesto u kljucu
@@ -88,12 +85,7 @@ class Program
 
     static bool Sifra2(Operacija operacija)
     {
-        // ako ne postoji pi fajl onda greska
-        // sabira se kljuc i krece se sifrovanje od cifre pi koja je jednaka zbiru kljuca.
-        // kada se sifruje broj karaktera ekvivalentat duzinu kljuca, preskace se na cifru pi za jos jednu duzinu kljuca pa se tako ponavlja.
-        // duzina kljuca je maks 10
-        // kljuc su slova i brojevi (za slova se sabira ascii kod)             
-        // datoteka cifara pi, u string, pa u char array, pa po potrebi parsiras
+        // sabira se kljuc i krece se sifrovanje od cifre pi koja je jednaka zbiru kljuca.  
         StreamReader sr; StreamWriter sw;
         if (File.Exists(operacija.datoteka))
             sr = new StreamReader(operacija.datoteka);
@@ -102,12 +94,12 @@ class Program
 
         int[] kljuc = new int[operacija.kljuc.Length];
         // kljuc u nizu
-      if(kljuc.Length > 10)
-        return false; // duzina kljuca ne treba biti veca od 10
+        if (kljuc.Length > 700)
+            return false; // duzina kljuca ne treba biti veca od 700
         for (int i = 0; i < operacija.kljuc.Length; i++)
         {
             //kljuc moze da bude samo slovo ili broj
-            //u kodu ispod: ascii kod ostaje isti, a stavljamo da cifre pomere za jacinu cifre a ne njihov ascii kod
+            //ascii kod ostaje isti, a stavljamo da cifre pomere za jacinu cifre a ne njihov ascii kod
             if (char.IsLetter(operacija.kljuc[i]))
                 kljuc[i] = char.ToUpper(operacija.kljuc[i]);
             else if (char.IsDigit(operacija.kljuc[i]))
@@ -124,54 +116,49 @@ class Program
         if (File.Exists("Cifre.Pi.txt"))
             pi = new StreamReader("Cifre.Pi.txt");
         else
-            return true;
+            return false;// greska
         char[] piNiz = pi.ReadLine().ToCharArray(); // niz cifara broja pi
-        int brojacPi; //broji u odnosu na kljucZbir
+        pi.Close();
+        int brojacPi = 0; //broji u odnosu na kljucZbir
         //Sifrovanje
-        if(operacija.sifrovanje)
+        if (operacija.sifrovanje)
         {
-            brojacPi = 0;
+            sw = new StreamWriter("sifrovana_" + operacija.datoteka);
             while (!sr.EndOfStream)
             {
-                sw = new StreamWriter("sifrovana_" + operacija.datoteka);
                 char[] temp = sr.ReadLine().ToCharArray();
-                for (int i = 0; i < temp.Length; i++) // sabira se kljuc i krece se sifrovanje od cifre pi koja je jednaka zbiru kljuca.
-                {
-                    if (brojacPi == kljuc.Length - 1)
-                    {
-                        brojacPi = 0; // kada se sifruje broj karaktera ekvivalentat duzinu kljuca, preskace se na cifru pi za jos jednu duzinu kljuca
-                        kljucZbir += kljuc.Length;
-                    }
-                    temp[i] += Convert.ToChar(piNiz[kljucZbir + brojacPi]);
+                for (int i = 0; i < temp.Length; i++) //sifruje se red po red
+                { 
+                  if(temp[i]+Convert.ToChar(piNiz[kljucZbir + brojacPi]-48)>127)
+                    temp[i] -= Convert.ToChar(127-32); //ako karakter izadje iz opsega ascii koda(127) umanjice se za ukupan broj ascii koda i krenuce od prvog karaktera (33)   
+                  temp[i] += Convert.ToChar(piNiz[kljucZbir + brojacPi]-48); 
+                    brojacPi++;
                 }
                 sw.WriteLine(temp);
-                Console.WriteLine("Uspesno sifrovano.");
-                sw.Close();
-                sr.Close();
             }
+            Console.WriteLine("Uspesno sifrovano.");
+            sw.Close();
+            sr.Close();
         }
         //Desifrovanje
         else
         {
-            brojacPi = 0;
             sw = new StreamWriter("desifrovana_" + operacija.datoteka);
             while (!sr.EndOfStream)
             {
                 char[] temp = sr.ReadLine().ToCharArray();
-                for (int i = 0; i < temp.Length; i++) // sabira se kljuc i krece se desifrovanje od cifre pi koja je jednaka zbiru kljuca.
+                for (int i = 0; i < temp.Length; i++) //desifruje se red po red
                 {
-                    if (brojacPi == kljuc.Length - 1)
-                    {
-                        brojacPi = 0; // kada se desifruje broj karaktera ekvivalentat duzinu kljuca, preskace se na cifru pi za jos jednu duzinu kljuca
-                        kljucZbir += kljuc.Length;
-                    }
-                    temp[i] -= Convert.ToChar(piNiz[kljucZbir + brojacPi]);
+                    if(temp[i]+Convert.ToChar(piNiz[kljucZbir + brojacPi]-48)<127)
+                    temp[i] += Convert.ToChar(127-32); //ako karakter izadje iz opsega ascii koda(127) uvecace se za ukupan broj ascii koda i krenuce od prvog karaktera (33) 
+                  temp[i] -= Convert.ToChar(piNiz[kljucZbir + brojacPi]-48);
+                    brojacPi++;
                 }
                 sw.WriteLine(temp);
-                Console.WriteLine("Uspesno desifrovano");
-                sw.Close();
-                sr.Close();
             }
+            Console.WriteLine("Uspesno desifrovano");
+            sw.Close();
+            sr.Close();
         }
         return true;
     }
@@ -186,5 +173,6 @@ class Program
     static void Main(string[] args)
     {
         Operacija[] operacije = new Operacija[2];//umesto 2 treba da stoji args.Length/4 ali jos nemam argumente, i ovo treba tek kasnije da se radi kada se argumenti provere
+      
     }
 }
