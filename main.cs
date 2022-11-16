@@ -30,7 +30,7 @@ class Program
         for (int i = 0; i < operacija.kljuc.Length; i++)
         {
             //kljuc moze da bude samo slovo ili broj za ovo sifrovanje
-            //u kodu ispod: ascii kod od slova pretvaramo u broj njihovog mesta u alfabetu, a stavljam da cifre pomere za jacinu cifre a ne njihov ascii kod
+            //u kodu ispod: ascii kod od slova pretvaram u broj njihovog mesta u alfabetu, a stavljam da cifre pomere za jacinu cifre a ne njihov ascii kod
             if (char.IsLetter(operacija.kljuc[i]))
             {
                 kljuc[i] = char.ToUpper(operacija.kljuc[i]) - 64;//A ima ascii kod od 65
@@ -38,7 +38,6 @@ class Program
             else if (char.IsDigit(operacija.kljuc[i]))
             {
                 kljuc[i] = operacija.kljuc[i] - 48;//0 ima ascii kod od 48
-                                                   //isti kljuc je abc i 123
             }
             else
             {
@@ -55,7 +54,8 @@ class Program
 
                 for (int i = 0; i < temp.Length; i++)
                 {
-                    temp[i] += Convert.ToChar(kljuc[i % kljuc.Length]);//za sifrovanje povecam ascii kod svakog karaktera za njegovo odgovarajuce mesto u kljucu
+                    if (temp[i] + kljuc[i % kljuc.Length] < char.MaxValue) temp[i] = Convert.ToChar(temp[i] + kljuc[i % kljuc.Length]);//za sifrovanje povecam ascii kod svakog karaktera za njegovo odgovarajuce mesto u kljucu
+                    else temp[i] = Convert.ToChar(temp[i] + kljuc[i % kljuc.Length] - char.MaxValue + 32);//na 32 mestu je prvi karakter koji nije neka "komanda"
                 }
                 sw.WriteLine(temp);
             }
@@ -72,7 +72,8 @@ class Program
                 char[] temp = sr.ReadLine().ToCharArray();
                 for (int i = 0; i < temp.Length; i++)
                 {
-                    temp[i] -= Convert.ToChar(kljuc[i % kljuc.Length]);//za sifrovanje smanjim ascii kod svakog karaktera za njegovo odgovarajuce mesto u kljucu
+                    if (temp[i] - kljuc[i % kljuc.Length] > 0) temp[i] = Convert.ToChar(temp[i] - kljuc[i % kljuc.Length]);//za desifrovanje smanjim ascii kod svakog karaktera za njegovo odgovarajuce mesto u kljucu
+                    else temp[i] = Convert.ToChar(temp[i] - kljuc[i % kljuc.Length] + char.MaxValue - 32);
                 }
                 sw.WriteLine(temp);
             }
@@ -82,7 +83,6 @@ class Program
         }
         return true;//ako sve prodje vraca tacno
     }
-
     static bool Sifra2(Operacija operacija)
     {
         // sabira se kljuc i krece se sifrovanje od cifre pi koja je jednaka zbiru kljuca.  
@@ -94,8 +94,8 @@ class Program
 
         int[] kljuc = new int[operacija.kljuc.Length];
         // kljuc u nizu
-        if (kljuc.Length > 700)
-            return false; // duzina kljuca ne treba biti veca od 700
+        if (kljuc.Length > 50)
+            return false; // duzina kljuca ne treba biti veca od 50
         for (int i = 0; i < operacija.kljuc.Length; i++)
         {
             //kljuc moze da bude samo slovo ili broj
@@ -128,10 +128,15 @@ class Program
             {
                 char[] temp = sr.ReadLine().ToCharArray();
                 for (int i = 0; i < temp.Length; i++) //sifruje se red po red
-                { 
-                  if(temp[i]+Convert.ToChar(piNiz[kljucZbir + brojacPi]-48)>127)
-                    temp[i] -= Convert.ToChar(127-32); //ako karakter izadje iz opsega ascii koda(127) umanjice se za ukupan broj ascii koda i krenuce od prvog karaktera (33)   
-                  temp[i] += Convert.ToChar(piNiz[kljucZbir + brojacPi]-48); 
+                {
+                    if (kljucZbir + brojacPi == 100000)
+                    {
+                        kljucZbir = 0;
+                        brojacPi = 0;
+                    }
+                    if (temp[i] + Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48) > char.MaxValue)
+                        temp[i] -= Convert.ToChar(char.MaxValue - 32); //ako karakter izadje iz opsega ascii koda(127) umanjice se za ukupan broj ascii koda i krenuce od prvog karaktera (33)   
+                    temp[i] += Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48);
                     brojacPi++;
                 }
                 sw.WriteLine(temp);
@@ -149,9 +154,14 @@ class Program
                 char[] temp = sr.ReadLine().ToCharArray();
                 for (int i = 0; i < temp.Length; i++) //desifruje se red po red
                 {
-                    if(temp[i]+Convert.ToChar(piNiz[kljucZbir + brojacPi]-48)<127)
-                    temp[i] += Convert.ToChar(127-32); //ako karakter izadje iz opsega ascii koda(127) uvecace se za ukupan broj ascii koda i krenuce od prvog karaktera (33) 
-                  temp[i] -= Convert.ToChar(piNiz[kljucZbir + brojacPi]-48);
+                    if (kljucZbir + brojacPi == 100000)
+                    {
+                        kljucZbir = 0;
+                        brojacPi = 0;
+                    }
+                    if (temp[i] + Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48) < char.MaxValue)
+                        temp[i] += Convert.ToChar(char.MaxValue - 32); //ako karakter izadje iz opsega ascii koda(127) uvecace se za ukupan broj ascii koda i krenuce od prvog karaktera (33) 
+                    temp[i] -= Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48);
                     brojacPi++;
                 }
                 sw.WriteLine(temp);
@@ -173,6 +183,6 @@ class Program
     static void Main(string[] args)
     {
         Operacija[] operacije = new Operacija[2];//umesto 2 treba da stoji args.Length/4 ali jos nemam argumente, i ovo treba tek kasnije da se radi kada se argumenti provere
-      
+
     }
 }
