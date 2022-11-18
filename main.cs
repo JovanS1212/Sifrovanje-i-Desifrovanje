@@ -155,7 +155,76 @@ class Program
         return true;
     }
 
-    static void IspisRadaPrograma(string greska)//Po pozivu uneti koja se greska desila
+    static bool Sifra3(Operacija operacija)
+    {
+        StreamReader sr;
+        StreamWriter sw;
+        if (File.Exists(operacija.datoteka))
+        {
+            sr = new StreamReader(operacija.datoteka);
+        }
+        else return false;
+
+        //kljuc
+        int kljuc=Convert.ToInt32(operacija.kljuc); 
+
+        //Sifrovanje
+        if (operacija.sifrovanje)
+        {
+            sw = new StreamWriter("sifrovana_" + operacija.datoteka);
+            while (!sr.EndOfStream)
+            {
+                char[] temp = sr.ReadLine().ToCharArray();
+                for (int i = 0; i < temp.Length; i++)
+                {
+                    if (temp[i] + kljuc > char.MaxValue)
+                    {
+                        sw.Write(Convert.ToChar(temp[i] + kljuc - char.MaxValue));
+                    }
+                    else if (temp[i] + kljuc < 0)
+                    {
+                        sw.Write(Convert.ToChar(temp[i] + kljuc + char.MaxValue));
+                    }
+                    else { sw.Write(Convert.ToChar(temp[i] + kljuc)); }
+                   
+                }
+                sw.WriteLine();
+            }
+            Console.WriteLine("Uspesno sifrovano.");
+            sw.Close();
+            sr.Close();
+        }
+
+        //Desifrovanje
+        else
+        {
+            sw = new StreamWriter("desifrovana_" + operacija.datoteka);
+            while (!sr.EndOfStream)
+            {
+                char[] temp = sr.ReadLine().ToCharArray();
+                for (int i = 0; i < temp.Length; i++)
+                {
+                    if (temp[i] - kljuc > char.MaxValue)
+                    {
+                        sw.Write(Convert.ToChar(temp[i] - kljuc - char.MaxValue));
+                    }
+                    else if (temp[i] - kljuc < 0)
+                    {
+                        sw.Write(Convert.ToChar(temp[i] - kljuc + char.MaxValue));
+                    }
+                    else { sw.Write(Convert.ToChar(temp[i] + kljuc)); }
+
+                }
+                sw.WriteLine();
+            }
+            Console.WriteLine("Uspesno desifrovano");
+            sw.Close();
+            sr.Close();
+        }
+        return true;
+    }
+  
+  static void IspisRadaPrograma(string greska)//Po pozivu uneti koja se greska desila
     {
         Console.WriteLine("program radi tako sto:");
         Console.WriteLine("bla bla bla");//ovo moze i sa datotekom
@@ -166,7 +235,7 @@ class Program
         {
             Operacija[] operacije;
             string[] uspesnostSifre;
-            if (args.Length%4 != 0 || args.Length == 0)
+            if (args.Length % 4 != 0 || args.Length == 0)
             {
                 IspisRadaPrograma("GRESKA! Broj unetih argumenata nije dobar");
                 return;
