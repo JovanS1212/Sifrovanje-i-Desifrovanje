@@ -1,8 +1,5 @@
-
-
 using System;
 using System.Text;
-using System.Threading;
 using System.IO;
 
 class Program
@@ -166,69 +163,84 @@ class Program
     }
 
     static void Main(string[] args)
-    {
-        Operacija[] operacije;
-        string[] uspesnostSifre;
-        if (args.Length % 4 != 0 || args.Length == 0)
         {
-            IspisRadaPrograma("GRESKA! Broj unetih argumenata nije dobar");
-            return;
-        }
-        else
-        {
-            operacije = new Operacija[args.Length / 4];
-            uspesnostSifre = new string[args.Length / 4];
-        }
-        for (int i = 0; i < args.Length / 4; i++)
-        {
-            //Provera za naziv datoteke
-            if (!args[i].EndsWith(".txt") || !File.Exists(args[i]))
+            Operacija[] operacije;
+            string[] uspesnostSifre;
+            if (args.Length%4 != 0 || args.Length == 0)
             {
-                uspesnostSifre[i] = $"GRESKA! {i + 1}. Fajl nije dobro unet";
-                Console.WriteLine(uspesnostSifre[i]);
-                continue;
-            }
-            operacije[i].datoteka = args[i];
-            //Provera za nacin sifrovanja
-            if (!int.TryParse(args[i + 1], out operacije[i].brSifre) || operacije[i].brSifre > 3 || operacije[i].brSifre < 1)
-            {
-                uspesnostSifre[i] = $"GRESKA! {i + 1}. Broj sifre nije dobro unet";
-                Console.WriteLine(uspesnostSifre[i]);
-                continue;
-            }
-            //Provera za sifrovanje/desifrovanje
-            if (args[i + 2] == "a") operacije[i].sifrovanje = true;//ovo mozemo i da stavimo da bude s kao skraceno od sifrovanje
-            else if (args[i + 2] == "b") operacije[i].sifrovanje = false;//ovo mozemo i da stavimo da bude d kao skraceno od desifrovanje
-            else
-            {
-                uspesnostSifre[i] = $"GRESKA! {i + 1}. Specifikacija za sifrovanje nije dobro uneta";
-                Console.WriteLine(uspesnostSifre[i]);
-                continue;
-            }
-            //provera za unet kljuc
-            operacije[i].kljuc = args[i + 3];
-            if (!sifra1(operacije[i]))
-            {
-                uspesnostSifre[i] = $"GRESKA! {i + 1}. Kljuc nije dobro unet";
-                Console.WriteLine(uspesnostSifre[i]);
-                continue;
-            }
-            else if (operacije[i].sifrovanje == true)
-            {
-                Console.WriteLine("Uspesno izvrseno {0}. sifrovanje", i + 1);
-            }
-            else if (operacije[i].sifrovanje == false)
-            {
-                Console.WriteLine("Uspesno izvrseno {0}. desifrovanje", i + 1);
-            }
-        }
-        for (int i = 0; i < uspesnostSifre.Length; i++)
-        {
-            if (uspesnostSifre[i] != null)
-            {
-                IspisRadaPrograma("");
+                IspisRadaPrograma("GRESKA! Broj unetih argumenata nije dobar");
                 return;
             }
+            else
+            {
+                operacije = new Operacija[args.Length/4];
+                uspesnostSifre = new string[args.Length / 4];
+            }
+            int indeksArgs = 0;
+            int indeksOperacije = 0;
+            while (indeksArgs < args.Length)
+            {
+                //Provera za naziv datoteke
+                if (!args[indeksArgs].EndsWith(".txt") || !File.Exists(args[indeksArgs]))
+                {
+                    uspesnostSifre[indeksOperacije] = $"GRESKA! {indeksOperacije + 1}. Fajl nije dobro unet";
+                    Console.WriteLine(uspesnostSifre[indeksOperacije]);
+                    indeksArgs += 4-(indeksArgs % 4);
+                    indeksOperacije++;
+                    continue;
+                }
+                operacije[indeksOperacije].datoteka = args[indeksArgs];
+                //Provera za nacin sifrovanja
+                indeksArgs += 1;
+                if (!int.TryParse(args[indeksArgs], out operacije[indeksOperacije].brSifre) || operacije[indeksOperacije].brSifre > 3 || operacije[indeksOperacije].brSifre < 1)
+                {
+                    uspesnostSifre[indeksOperacije] = $"GRESKA! {indeksOperacije + 1}. Broj sifre nije dobro unet";
+                    Console.WriteLine(uspesnostSifre[indeksOperacije]);
+                    indeksArgs += 4 - (indeksArgs % 4);
+                    indeksOperacije++;
+                    continue;
+                }
+                //Provera za sifrovanje/desifrovanje
+                indeksArgs += 1;
+                if (args[indeksArgs] == "a") operacije[indeksOperacije].sifrovanje = true;//ovo mozemo i da stavimo da bude s kao skraceno od sifrovanje
+                else if(args[indeksArgs] == "b") operacije[indeksOperacije].sifrovanje= false;//ovo mozemo i da stavimo da bude d kao skraceno od desifrovanje
+                else
+                {
+                    uspesnostSifre[indeksOperacije] = $"GRESKA! {indeksOperacije + 1}. Specifikacija za sifrovanje nije dobro uneta";
+                    Console.WriteLine(uspesnostSifre[indeksOperacije]);
+                    indeksArgs += 4 - (indeksArgs % 4);
+                    indeksOperacije++;
+                    continue;
+                }
+                //provera za unet kljuc
+                indeksArgs += 1;
+                operacije[indeksOperacije].kljuc = args[indeksArgs];
+                if (!sifra1(operacije[indeksOperacije]))
+                {
+                    uspesnostSifre[indeksOperacije] = $"GRESKA! {indeksOperacije + 1}. Kljuc nije dobro unet";
+                    Console.WriteLine(uspesnostSifre[indeksOperacije]);
+                    indeksArgs += 4 - (indeksArgs % 4);
+                    indeksOperacije++;
+                    continue;
+                }
+                else if(operacije[indeksOperacije].sifrovanje == true)
+                {
+                    Console.WriteLine("Uspesno izvrseno {0}. sifrovanje", indeksOperacije + 1);
+                }
+                else if (operacije[indeksOperacije].sifrovanje == false)
+                {
+                    Console.WriteLine("Uspesno izvrseno {0}. desifrovanje", indeksOperacije + 1);
+                }
+                indeksArgs++;
+                indeksOperacije++;
+            }
+            for (int i = 0; i < uspesnostSifre.Length; i++)
+            {
+                if (uspesnostSifre[i]!=null)
+                {
+                    IspisRadaPrograma("");
+                    return;
+                }
+            }
         }
-    }
 }
