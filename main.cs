@@ -11,7 +11,7 @@ class Program
         public bool sifrovanje; //glup naziv
         public string kljuc;
     }
-    static bool sifra1(Operacija operacija)
+    static bool Sifra1(Operacija operacija)
     {
         StreamWriter sw;
         StreamReader sr;
@@ -44,8 +44,8 @@ class Program
 
                 for (int i = 0; i < temp.Length; i++)
                 {
-                    if (temp[i] + kljuc[i % kljuc.Length] < char.MaxValue) temp[i] = Convert.ToChar(temp[i] + kljuc[i % kljuc.Length]);//za sifrovanje povecam ascii kod svakog karaktera za njegovo odgovarajuce mesto u kljucu
-                    else temp[i] = Convert.ToChar(temp[i] + kljuc[i % kljuc.Length] - char.MaxValue + 32);//na 32 mestu je prvi karakter koji nije neka "komanda"
+                    if (temp[i] + kljuc[i % kljuc.Length] < 255) temp[i] = Convert.ToChar(temp[i] + kljuc[i % kljuc.Length]);//za sifrovanje povecam ascii kod svakog karaktera za njegovo odgovarajuce mesto u kljucu
+                    else temp[i] = Convert.ToChar(temp[i] + kljuc[i % kljuc.Length] - 255 + 32);//na 32 mestu je prvi karakter koji nije neka "komanda"
                 }
                 sw.WriteLine(temp);
             }
@@ -62,7 +62,7 @@ class Program
                 for (int i = 0; i < temp.Length; i++)
                 {
                     if (temp[i] - kljuc[i % kljuc.Length] > 0) temp[i] = Convert.ToChar(temp[i] - kljuc[i % kljuc.Length]);//za desifrovanje smanjim ascii kod svakog karaktera za njegovo odgovarajuce mesto u kljucu
-                    else temp[i] = Convert.ToChar(temp[i] - kljuc[i % kljuc.Length] + char.MaxValue - 32);
+                    else temp[i] = Convert.ToChar(temp[i] - kljuc[i % kljuc.Length] + 255 - 32);
                 }
                 sw.WriteLine(temp);
             }
@@ -118,8 +118,8 @@ class Program
                         kljucZbir = 0;
                         brojacPi = 0;
                     }
-                    if (temp[i] + Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48) > char.MaxValue)
-                        temp[i] -= Convert.ToChar(char.MaxValue - 32); //ako karakter izadje iz opsega ascii koda(127) umanjice se za ukupan broj ascii koda i krenuce od prvog karaktera (33)   
+                    if (temp[i] + Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48) > 255)
+                        temp[i] -= Convert.ToChar(255 - 32); //ako karakter izadje iz opsega ascii koda(127) umanjice se za ukupan broj ascii koda i krenuce od prvog karaktera (33)   
                     temp[i] += Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48);
                     brojacPi++;
                 }
@@ -142,8 +142,8 @@ class Program
                         kljucZbir = 0;
                         brojacPi = 0;
                     }
-                    if (temp[i] + Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48) < char.MaxValue)
-                        temp[i] += Convert.ToChar(char.MaxValue - 32); //ako karakter izadje iz opsega ascii koda(127) uvecace se za ukupan broj ascii koda i krenuce od prvog karaktera (33) 
+                    if (temp[i] + Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48) < 255)
+                        temp[i] += Convert.ToChar(255 - 32); //ako karakter izadje iz opsega ascii koda(127) uvecace se za ukupan broj ascii koda i krenuce od prvog karaktera (33) 
                     temp[i] -= Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48);
                     brojacPi++;
                 }
@@ -159,15 +159,12 @@ class Program
     {
         StreamReader sr;
         StreamWriter sw;
-        if (File.Exists(operacija.datoteka))
-        {
-            sr = new StreamReader(operacija.datoteka);
-        }
-        else return false;
-
+        sr = new StreamReader(operacija.datoteka);
         //kljuc
-        int kljuc=Convert.ToInt32(operacija.kljuc); 
-
+        int kljuc; 
+        if(!int.TryParse(operacija.kljuc, out kljuc) || kljuc>255){
+          return false;
+        }
         //Sifrovanje
         if (operacija.sifrovanje)
         {
@@ -177,20 +174,19 @@ class Program
                 char[] temp = sr.ReadLine().ToCharArray();
                 for (int i = 0; i < temp.Length; i++)
                 {
-                    if (temp[i] + kljuc > char.MaxValue)
+                    if (temp[i] + kljuc > 255)
                     {
-                        sw.Write(Convert.ToChar(temp[i] + kljuc - char.MaxValue));
+                        sw.Write(Convert.ToChar(temp[i] + kljuc - 255));
                     }
                     else if (temp[i] + kljuc < 0)
                     {
-                        sw.Write(Convert.ToChar(temp[i] + kljuc + char.MaxValue));
+                        sw.Write(Convert.ToChar(temp[i] + kljuc + 255));
                     }
                     else { sw.Write(Convert.ToChar(temp[i] + kljuc)); }
                    
                 }
                 sw.WriteLine();
             }
-            Console.WriteLine("Uspesno sifrovano.");
             sw.Close();
             sr.Close();
         }
@@ -204,20 +200,19 @@ class Program
                 char[] temp = sr.ReadLine().ToCharArray();
                 for (int i = 0; i < temp.Length; i++)
                 {
-                    if (temp[i] - kljuc > char.MaxValue)
+                    if (temp[i] - kljuc > 255)
                     {
-                        sw.Write(Convert.ToChar(temp[i] - kljuc - char.MaxValue));
+                        sw.Write(Convert.ToChar(temp[i] - kljuc - 255));
                     }
                     else if (temp[i] - kljuc < 0)
                     {
-                        sw.Write(Convert.ToChar(temp[i] - kljuc + char.MaxValue));
+                        sw.Write(Convert.ToChar(temp[i] - kljuc + 255));
                     }
-                    else { sw.Write(Convert.ToChar(temp[i] + kljuc)); }
+                    else { sw.Write(Convert.ToChar(temp[i] - kljuc)); }
 
                 }
                 sw.WriteLine();
             }
-            Console.WriteLine("Uspesno desifrovano");
             sw.Close();
             sr.Close();
         }
@@ -227,7 +222,7 @@ class Program
   static void IspisRadaPrograma(string greska)//Po pozivu uneti koja se greska desila
     {
         Console.WriteLine("program radi tako sto:");
-        Console.WriteLine("bla bla bla");//ovo moze i sa datotekom
+        Console.WriteLine(" ");
         Console.WriteLine(greska);
     }
 
@@ -284,7 +279,9 @@ class Program
                 //provera za unet kljuc
                 indeksArgs += 1;
                 operacije[indeksOperacije].kljuc = args[indeksArgs];
-                if (!sifra1(operacije[indeksOperacije]))
+                if (operacije[indeksOperacije].kljuc == "1"?!Sifra1(operacije[indeksOperacije]) :
+                   operacije[indeksOperacije].kljuc == "2"?!Sifra2(operacije[indeksOperacije]):
+                   !Sifra3(operacije[indeksOperacije]))
                 {
                     uspesnostSifre[indeksOperacije] = $"GRESKA! {indeksOperacije + 1}. Kljuc nije dobro unet";
                     Console.WriteLine(uspesnostSifre[indeksOperacije]);
