@@ -8,7 +8,7 @@ class Program
     {
         public string datoteka;
         public int brSifre;
-        public bool sifrovanje; //glup naziv
+        public bool sifrovanje; 
         public string kljuc;
     }
     static bool Sifra1(Operacija operacija)
@@ -16,6 +16,8 @@ class Program
         StreamWriter sw;
         StreamReader sr;
         int[] kljuc = new int[operacija.kljuc.Length];
+        if (kljuc.Length > 50)
+            return false; // duzina kljuca ne treba biti veca od 50
         sr = new StreamReader(operacija.datoteka);
         for (int i = 0; i < operacija.kljuc.Length; i++)
         {
@@ -45,7 +47,7 @@ class Program
                 for (int i = 0; i < temp.Length; i++)
                 {
                     if (temp[i] + kljuc[i % kljuc.Length] < 255) temp[i] = Convert.ToChar(temp[i] + kljuc[i % kljuc.Length]);//za sifrovanje povecam ascii kod svakog karaktera za njegovo odgovarajuce mesto u kljucu
-                    else temp[i] = Convert.ToChar(temp[i] + kljuc[i % kljuc.Length] - 255 + 32);//na 32 mestu je prvi karakter koji nije neka "komanda"
+                    else temp[i] = Convert.ToChar(temp[i] + kljuc[i % kljuc.Length] - 256);//na 32 mestu je prvi karakter koji nije neka "komanda"
                 }
                 sw.WriteLine(temp);
             }
@@ -62,7 +64,7 @@ class Program
                 for (int i = 0; i < temp.Length; i++)
                 {
                     if (temp[i] - kljuc[i % kljuc.Length] > 0) temp[i] = Convert.ToChar(temp[i] - kljuc[i % kljuc.Length]);//za desifrovanje smanjim ascii kod svakog karaktera za njegovo odgovarajuce mesto u kljucu
-                    else temp[i] = Convert.ToChar(temp[i] - kljuc[i % kljuc.Length] + 255 - 32);
+                    else temp[i] = Convert.ToChar(temp[i] - kljuc[i % kljuc.Length] + 256);
                 }
                 sw.WriteLine(temp);
             }
@@ -75,11 +77,11 @@ class Program
     {
         // sabira se kljuc i krece se sifrovanje od cifre pi koja je jednaka zbiru kljuca.  
         StreamReader sr; StreamWriter sw;
-        sr = new StreamReader(operacija.datoteka);
         int[] kljuc = new int[operacija.kljuc.Length];
         // kljuc u nizu
         if (kljuc.Length > 50)
             return false; // duzina kljuca ne treba biti veca od 50
+        sr = new StreamReader(operacija.datoteka);
         for (int i = 0; i < operacija.kljuc.Length; i++)
         {
             //kljuc moze da bude samo slovo ili broj
@@ -113,13 +115,13 @@ class Program
                 char[] temp = sr.ReadLine().ToCharArray();
                 for (int i = 0; i < temp.Length; i++) //sifruje se red po red
                 {
-                    if (kljucZbir + brojacPi == 100000)
+                    if (kljucZbir + brojacPi == 99999)
                     {
                         kljucZbir = 0;
                         brojacPi = 0;
                     }
                     if (temp[i] + Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48) > 255)
-                        temp[i] -= Convert.ToChar(255 - 32); //ako karakter izadje iz opsega ascii koda(127) umanjice se za ukupan broj ascii koda i krenuce od prvog karaktera (33)   
+                        temp[i] -= Convert.ToChar(256); //ako karakter izadje iz opsega ascii koda(127) umanjice se za ukupan broj ascii koda i krenuce od prvog karaktera (33)   
                     temp[i] += Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48);
                     brojacPi++;
                 }
@@ -137,13 +139,13 @@ class Program
                 char[] temp = sr.ReadLine().ToCharArray();
                 for (int i = 0; i < temp.Length; i++) //desifruje se red po red
                 {
-                    if (kljucZbir + brojacPi == 100000)
+                    if (kljucZbir + brojacPi == 99999)
                     {
                         kljucZbir = 0;
                         brojacPi = 0;
                     }
-                    if (temp[i] + Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48) < 255)
-                        temp[i] += Convert.ToChar(255 - 32); //ako karakter izadje iz opsega ascii koda(127) uvecace se za ukupan broj ascii koda i krenuce od prvog karaktera (33) 
+                    if (temp[i] - Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48) < 0)
+                        temp[i] += Convert.ToChar(256); //ako karakter izadje iz opsega ascii koda(127) uvecace se za ukupan broj ascii koda i krenuce od prvog karaktera (33) 
                     temp[i] -= Convert.ToChar(piNiz[kljucZbir + brojacPi] - 48);
                     brojacPi++;
                 }
@@ -162,9 +164,9 @@ class Program
         sr = new StreamReader(operacija.datoteka);
         //kljuc
         int kljuc; 
-        if(!int.TryParse(operacija.kljuc, out kljuc) || kljuc>255){
-          return false;
-        }
+        if(!int.TryParse(operacija.kljuc, out kljuc) || kljuc>255)
+          return false; // duzina kljuca ne treba biti veca od 50
+        
         //Sifrovanje
         if (operacija.sifrovanje)
         {
@@ -176,11 +178,11 @@ class Program
                 {
                     if (temp[i] + kljuc > 255)
                     {
-                        sw.Write(Convert.ToChar(temp[i] + kljuc - 255));
+                        sw.Write(Convert.ToChar(temp[i] + kljuc - 256));
                     }
                     else if (temp[i] + kljuc < 0)
                     {
-                        sw.Write(Convert.ToChar(temp[i] + kljuc + 255));
+                        sw.Write(Convert.ToChar(temp[i] + kljuc + 256));
                     }
                     else { sw.Write(Convert.ToChar(temp[i] + kljuc)); }
                    
@@ -202,11 +204,11 @@ class Program
                 {
                     if (temp[i] - kljuc > 255)
                     {
-                        sw.Write(Convert.ToChar(temp[i] - kljuc - 255));
+                        sw.Write(Convert.ToChar(temp[i] - kljuc - 256));
                     }
                     else if (temp[i] - kljuc < 0)
                     {
-                        sw.Write(Convert.ToChar(temp[i] - kljuc + 255));
+                        sw.Write(Convert.ToChar(temp[i] - kljuc + 256));
                     }
                     else { sw.Write(Convert.ToChar(temp[i] - kljuc)); }
 
@@ -226,8 +228,9 @@ class Program
         Console.WriteLine("-1. argument je naziv datoteke.");
         Console.WriteLine("-2. argument je broj sifre koju zelite da koristite.\nUnesite broj '1', '2' ili '3'.");
         Console.WriteLine("-3. argument je izbor izmedju sifrovanja i desifrovanja.\nUnesite slovo 's' ili 'd'.");
-        Console.WriteLine("-4. argument je kljuc za sifrovanje. To moze biti bilo koja niska.");
-        Console.WriteLine("Pokrenite program ponovo i ispravno unesite podatke.");
+        Console.WriteLine("-4. argument je kljuc za sifrovanje. Kljuc mora biti manji\nod 50 karaktera. U slucaju trece sifre kljuc mora biti samo\nbroj, a u slucaju prve i druge mogu biti i slova.");
+    Console.WriteLine("NAPOMENA: Program moze da sifruje samo karaktere u opsegu\nextended ASCII. U suprotnom ce doci do greske.");
+        Console.WriteLine("-Pokrenite program ponovo i ispravno unesite podatke.");
     }
     static void Main(string[] args)
         {
